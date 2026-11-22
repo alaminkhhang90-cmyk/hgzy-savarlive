@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'>
+<link href='https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap' rel='stylesheet'>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+user-select:none;
+}
+
+body{
+background:transparent;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family:'Orbitron',sans-serif;
+overflow:hidden;
+}
+
+#bg{
+position:fixed;
+inset:0;
+z-index:0;
+overflow:hidden;
+}
+
+#bg iframe{
+width:100%;
+height:100%;
+border:none;
+}
+
+/* Password Gate Styling */
+#pass-gate{
+position:fixed;
+inset:0;
+background:rgba(10, 5, 20, 0.92);
+backdrop-filter:blur(14px);
+display:none;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+z-index:10000;
+padding:20px;
+}
+
+.pass-card{
+width:270px;
+padding:22px 18px;
+border-radius:20px;
+background:linear-gradient(135deg,rgba(255,0,85,0.28),rgba(0,255,204,0.22),rgba(10,5,20,0.96));
+border:2px solid #ff0055;
+box-shadow:0 0 30px #ff0055,0 0 60px rgba(0,255,204,0.4);
+text-align:center;
+}
+
+.pass-title{
+font-size:15px;
+font-weight:900;
+color:#00ffcc;
+text-shadow:0 0 12px #00ffcc;
+margin-bottom:6px;
+letter-spacing:1px;
+}
+
+.pass-sub{
+font-size:8.5px;
+color:#ffcc00;
+margin-bottom:14px;
+letter-spacing:0.8px;
+}
+
+.pass-input{
+width:100%;
+padding:10px;
+border-radius:10px;
+border:1.5px solid #00ffcc;
+background:rgba(0,0,0,0.75);
+color:#fff;
+font-family:'Orbitron',sans-serif;
+font-size:13px;
+font-weight:700;
+text-align:center;
+outline:none;
+margin-bottom:12px;
+user-select:text;
+}
+
+.pass-input::placeholder{
+color:rgba(255,255,255,0.45);
+font-size:10px;
+}
+
+.pass-err{
+font-size:8.5px;
+color:#ff0055;
+font-weight:900;
+margin-bottom:10px;
+display:none;
+text-shadow:0 0 8px #ff0055;
+}
+
+#mini{
+width:65px;
+height:65px;
+position:fixed;
+left:30px;
+top:120px;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:1000;
+touch-action:none;
+}
+
+#mini::before{
+content:'';
+position:absolute;
+inset:-3px;
+border-radius:50%;
+background:linear-gradient(120deg,#ff0055,#00ffcc,#ff0055);
+animation:spin 1.2s linear infinite;
+}
+
+#mini .hgzy-circle{
+width:54px;
+height:54px;
+border-radius:50%;
+border:2px solid #fff;
+box-shadow:0 0 25px #ff0055;
+background:radial-gradient(circle at 30% 25%, #2b0918, #0a0514 80%);
+color:#00ffcc;
+font-size:11px;
+font-weight:900;
+letter-spacing:0.6px;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:2;
+animation:pulse 1.5s infinite alternate;
+text-shadow:0 0 12px #00ffcc;
+}
+
+@keyframes pulse{
+0%{box-shadow:0 0 10px #ff0055;}
+100%{box-shadow:0 0 30px #00ffcc;}
+}
+
+@keyframes spin{
+100%{transform:rotate(360deg);}
+}
+
+.box{
+width:242px;
+padding:12px;
+border-radius:20px;
+background:linear-gradient(135deg,rgba(255,0,85,0.25),rgba(0,255,204,0.2),rgba(10,5,20,0.95));
+backdrop-filter:blur(12px);
+border:2px solid #ff0055;
+box-shadow:0 0 25px #ff0055,0 0 50px #00ffcc,inset 0 0 30px rgba(255,0,85,0.4);
+position:fixed;
+display:none;
+flex-direction:column;
+z-index:1001;
+left:30px;
+top:120px;
+touch-action:none;
+}
+
+.top-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:6px;
+margin-bottom:6px;
+}
+
+.title{
+color:#fff;
+font-size:10px;
+text-shadow:0 0 15px #ff0055;
+font-weight:900;
+text-align:left;
+}
+
+.live-badge{
+font-size:7px;
+font-weight:900;
+padding:2px 6px;
+border-radius:5px;
+background:rgba(0,255,204,0.16);
+color:#00ffcc;
+border:1px solid #00ffcc;
+box-shadow:0 0 8px rgba(0,255,204,0.45);
+}
+
+.panel{
+height:122px;
+border-radius:12px;
+background:linear-gradient(135deg,rgba(255,0,85,0.15),rgba(0,0,0,0.82));
+border:1px solid rgba(255,0,85,0.45);
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+margin-bottom:8px;
+position:relative;
+overflow:hidden;
+padding:6px;
+}
+
+.scan-line{
+position:absolute;
+width:100%;
+height:3px;
+background:linear-gradient(90deg,transparent,#ff0055,transparent);
+box-shadow:0 0 15px #ff0055;
+animation:scanMove 1.5s ease-in-out infinite;
+z-index:3;
+}
+
+@keyframes scanMove{
+0%{top:-5%;}
+100%{top:105%;}
+}
+
+.circle{
+width:42px;
+height:42px;
+border-radius:50%;
+border:4px solid rgba(255,255,255,0.1);
+border-top:4px solid #ff0055;
+border-right:4px solid #00ffcc;
+animation:spin 1s linear infinite;
+display:none;
+box-shadow:0 0 20px #ff0055;
+z-index:4;
+}
+
+.signal-row{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+z-index:5;
+}
+
+.signal-text{
+font-size:15px;
+font-weight:900;
+color:#00ffcc;
+text-shadow:0 0 14px rgba(0,255,204,0.8);
+}
+
+.value{
+font-size:14px;
+font-weight:900;
+color:#00ffcc;
+z-index:5;
+text-align:center;
+text-shadow:0 0 12px currentColor;
+}
+
+.sub{
+font-size:8px;
+color:#ffcc00;
+margin-top:5px;
+font-family:'Orbitron',sans-serif;
+font-weight:900;
+z-index:5;
+text-transform:uppercase;
+background:rgba(0,0,0,0.72);
+padding:2px 6px;
+border-radius:4px;
+border:1px solid rgba(255,0,85,0.5);
+}
+
+.trend-info{
+font-size:7.5px;
+color:#ff6699;
+margin-top:3px;
+font-weight:bold;
+z-index:5;
+}
+
+.last-live-bar{
+background:rgba(0,255,204,0.08);
+border:1px solid rgba(0,255,204,0.45);
+border-radius:8px;
+padding:5px 6px;
+text-align:center;
+margin-bottom:8px;
+font-size:7.6px;
+color:#00ffcc;
+font-weight:900;
+line-height:1.35;
+}
+
+.btns{
+display:flex;
+gap:8px;
+z-index:10;
+}
+
+.btn{
+flex:1;
+padding:7px;
+border:none;
+border-radius:8px;
+font-size:9px;
+font-weight:900;
+color:#fff;
+cursor:pointer;
+background:linear-gradient(90deg,#ff0055,#00ffcc);
+box-shadow:0 0 15px #ff0055;
+text-transform:uppercase;
+}
+
+.footer{
+display:flex;
+justify-content:space-between;
+margin-top:8px;
+font-size:8px;
+color:#00ffcc;
+font-weight:900;
+}
+
+.number-ball{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:38px;
+height:38px;
+border-radius:50%;
+color:#fff;
+font-size:17px;
+font-weight:900;
+border:2px solid rgba(255,255,255,0.75);
+text-shadow:0 1px 4px rgba(0,0,0,0.85);
+box-shadow:inset 0 -3px 8px rgba(0,0,0,0.35), 0 0 12px rgba(255,255,255,0.2);
+}
+
+.ball-red{
+background:radial-gradient(circle at 32% 25%, rgba(255,255,255,0.55), transparent 45%), #e21d1d;
+}
+
+.ball-green{
+background:radial-gradient(circle at 32% 25%, rgba(255,255,255,0.55), transparent 45%), #16a75f;
+}
+
+.ball-zero-violet{
+background:linear-gradient(135deg, #e21d1d 50%, #a846c8 50%);
+}
+
+.ball-five-violet{
+background:linear-gradient(135deg, #16a75f 50%, #a846c8 50%);
+}
+
+#result-popup {
+position: fixed;
+inset: 0;
+background: rgba(0, 0, 0, 0.85);
+backdrop-filter: blur(12px);
+display: none;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+z-index: 99999;
+animation: fadeIn 0.3s ease forwards;
+}
+
+.popup-card {
+width: 290px;
+background: linear-gradient(135deg, rgba(255,0,85,0.35), rgba(0,255,204,0.3), #0a0514);
+border-radius: 20px;
+padding: 24px 15px;
+text-align: center;
+border:2px solid #00ffcc;
+box-shadow:0 0 40px #00ffcc, 0 0 80px #ff0055, inset 0 0 30px rgba(0,255,204,0.4);
+font-family: 'Orbitron', sans-serif;
+color: #fff;
+animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.popup-title {
+font-size: 21px;
+font-weight: 900;
+color: #00ffcc;
+text-transform: uppercase;
+margin-bottom: 10px;
+text-shadow: 0 0 20px #00ffcc, 0 0 30px #ff0055;
+}
+
+.popup-amount {
+font-size: 17px;
+font-weight: 900;
+color: #ff0055;
+margin: 10px 0;
+text-shadow: 0 0 12px #ff0055;
+background: rgba(0,0,0,0.7);
+padding: 10px;
+border-radius: 10px;
+border:1px solid rgba(255,0,85,0.5);
+}
+
+.popup-sub {
+font-size: 9px;
+color: #ffcc00;
+margin-top: 6px;
+font-weight: bold;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+0% { transform: scale(0.3); opacity: 0; }
+100% { transform: scale(1); opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Password Gate Modal -->
+<div id='pass-gate'>
+    <div class='pass-card'>
+        <div class='pass-title'>SOHEL BHAI</div>
+        <div class='pass-sub'>ENTER PASSWORD TO UNLOCK</div>
+        <input type='password' id='pass-input' class='pass-input' placeholder='PASSWORD' autocomplete='off'>
+        <div id='pass-err' class='pass-err'>WRONG PASSWORD! TRY AGAIN</div>
+        <div class='btns'>
+            <button class='btn' onclick='checkPass()'>UNLOCK</button>
+            <button class='btn' style='background:#111;color:#fff;border:1px solid #ff0055;box-shadow:none;' onclick='closePassGate()'>CLOSE</button>
+        </div>
+    </div>
+</div>
+
+<div id='result-popup'>
+    <div class='popup-card'>
+        <div id='popup-header' class='popup-title'>CONGRATULATIONS</div>
+        <div id='popup-amount' class='popup-amount'>100৳</div>
+        <div id='popup-details' class='popup-sub'>Period: WinGo 1 Min</div>
+    </div>
+</div>
+
+<div id='bg'>
+<iframe src='https://hgnice.bet/#/register?invitationCode=524161618177'></iframe>
+</div>
+
+<div id='mini' title='HGZY'>
+<div class='hgzy-circle'>HGZY</div>
+</div>
+
+<div id='main' class='box'>
+<div class='top-row'>
+    <div class='title'>HGZY SAVAR LIVE</div>
+    <span class='live-badge'>HGZY LIVE</span>
+</div>
+
+<div class='panel'>
+<div class='scan-line'></div>
+<div id='circle' class='circle'></div>
+
+<div id='screen-content'>
+<div id='val' class='value'>SAVAR LIVE</div>
+<div id='sub' class='sub'>AMOUNT: 100৳</div>
+<div id='trend' class='trend-info'>FAST NET SYNC</div>
+</div>
+</div>
+
+<div class='last-live-bar' id='last-live-display'>
+    LIVE LAST: SYNCING...
+</div>
+
+<div class='btns'>
+<button id='btn-exec' class='btn'>TELEGRAM</button>
+<button class='btn' style='background:#111;color:#fff;border:1px solid #ff0055;box-shadow:none;' onclick='closeM()'>HIDE</button>
+</div>
+
+<div class='footer'>
+<span id='net-status'>SAVAR NET: TURBO</span>
+<span id='ping'>PING: 6ms</span>
+</div>
+</div>
+
+<script>
+var dragging=false;
+var activeBox=null;
+var startX=0,startY=0,initialX=0,initialY=0;
+var isUnlocked=false;
+
+const PANEL_PASSWORD = 'sv';
+const BASE_AMOUNT = 100;
+const RECOVERY_AMOUNT = 200;
+var currentStakeAmount = BASE_AMOUNT;
+var consecutiveLosses = 0;
+var lastAnalyzedIssue = null;
+var lastPredictedSignal = null;
+var lastPredictedNumber = null;
+var lastSeenPeriod = null;
+var cachedHistoryList = null;
+var realLatencyMs = 8;
+var isSyncingNow = false;
+
+function checkPass(){
+    var input = document.getElementById('pass-input').value.trim().toLowerCase();
+    var err = document.getElementById('pass-err');
+    if(input === PANEL_PASSWORD){
+        isUnlocked = true;
+        err.style.display = 'none';
+        document.getElementById('pass-gate').style.display = 'none';
+        openPanelDirectly();
+    } else {
+        err.style.display = 'block';
+        document.getElementById('pass-input').value = '';
+    }
+}
+
+function closePassGate(){
+    document.getElementById('pass-gate').style.display = 'none';
+    document.getElementById('pass-err').style.display = 'none';
+}
+
+document.getElementById('pass-input').addEventListener('keypress', function(e){
+    if(e.key === 'Enter'){
+        checkPass();
+    }
+});
+
+function getNumberColorClass(num){
+    if(num === 0) return 'ball-zero-violet';
+    if(num === 5) return 'ball-five-violet';
+    if(num === 1 || num === 3 || num === 7 || num === 9) return 'ball-green';
+    return 'ball-red';
+}
+
+function updateLiveLastResult(lastItem){
+    if(!lastItem) return;
+    let n = parseInt(lastItem.number, 10);
+    if(Number.isNaN(n)) return;
+    let s = (n >= 5) ? 'BIG' : 'SMALL';
+    let p = String(lastItem.issueNumber).slice(-5);
+    document.getElementById('last-live-display').innerHTML =
+        `LIVE LAST (${p}): <span style='color:#fff;'>${s} ${n}</span> | 100৳ | ${realLatencyMs}ms`;
+}
+
+function openPanelDirectly(){
+    var m=document.getElementById('mini');
+    var p=document.getElementById('main');
+    p.style.left=m.style.left || (m.offsetLeft+'px');
+    p.style.top=m.style.top || (m.offsetTop+'px');
+    p.style.display='flex';
+    m.style.display='none';
+}
+
+function openM(){
+    if(!isUnlocked){
+        document.getElementById('pass-gate').style.display = 'flex';
+        document.getElementById('pass-input').focus();
+        return;
+    }
+    openPanelDirectly();
+}
+
+function closeM(){
+    var m=document.getElementById('mini');
+    var p=document.getElementById('main');
+    m.style.left=p.style.left;
+    m.style.top=p.style.top;
+    p.style.display='none';
+    m.style.display='flex';
+}
+
+function drag(el){
+    el.addEventListener('touchstart',function(e){
+        dragging=false;
+        activeBox=el;
+        startX=e.touches[0].clientX;
+        startY=e.touches[0].clientY;
+        initialX=el.offsetLeft;
+        initialY=el.offsetTop;
+    },{passive:true});
+
+    document.addEventListener('touchmove',function(e){
+        if(!activeBox)return;
+        dragging=true;
+        e.preventDefault();
+        let x=initialX+(e.touches[0].clientX-startX);
+        let y=initialY+(e.touches[0].clientY-startY);
+        x = Math.max(4, Math.min(window.innerWidth - activeBox.offsetWidth - 4, x));
+        y = Math.max(4, Math.min(window.innerHeight - activeBox.offsetHeight - 4, y));
+        activeBox.style.left=x+'px';
+        activeBox.style.top=y+'px';
+        if(activeBox.id==='main'){
+            document.getElementById('mini').style.left=x+'px';
+            document.getElementById('mini').style.top=y+'px';
+        }
+    },{passive:false});
+
+    document.addEventListener('touchend',function(){
+        activeBox=null;
+        setTimeout(function(){dragging=false},50);
+    });
+}
+
+drag(document.getElementById('mini'));
+drag(document.getElementById('main'));
+
+document.getElementById('mini').addEventListener('click',function(){
+    if(!dragging){
+        openM();
+    }
+});
+
+document.getElementById('btn-exec').onclick = function(){
+    const tgHttps = 'https://t.me/+WZR7nsATt1szNmRh';
+    const tgApp = 'tg://join?invite=WZR7nsATt1szNmRh';
+    try {
+        analyzeMarket(true);
+    } catch (_) {}
+    var opened = false;
+    try {
+        var popupWin = window.open(tgHttps, '_blank', 'noopener,noreferrer');
+        if (popupWin && !popupWin.closed) {
+            opened = true;
+        }
+    } catch (_) {}
+    if (!opened) {
+        try {
+            window.top.location.href = tgHttps;
+        } catch (_) {
+            window.location.href = tgHttps;
+        }
+    }
+    setTimeout(function(){
+        if (document.visibilityState === 'visible') {
+            try {
+                window.location.assign(tgApp);
+            } catch (_) {}
+        }
+    }, 350);
+};
+
+function fetchSingleEndpoint(baseUrl, timeoutMs, startT){
+    const url = baseUrl + (baseUrl.indexOf('?') === -1 ? '?' : '&') + 'ts=' + Date.now();
+    const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    const limitMs = timeoutMs || 1800;
+    const timerId = controller ? setTimeout(() => controller.abort(), limitMs) : null;
+
+    return fetch(url, {
+        cache: 'no-store',
+        keepalive: true,
+        signal: controller ? controller.signal : undefined
+    }).then(r => {
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    }).then(data => {
+        if(timerId) clearTimeout(timerId);
+        const list = data && data.data && data.data.list;
+        if(!list || list.length < 5) throw new Error('Invalid list');
+        const elapsed = Math.max(3, Math.round(performance.now() - startT));
+        realLatencyMs = elapsed > 85 ? Math.max(10, Math.round(elapsed * 0.22)) : elapsed;
+        cachedHistoryList = list;
+        return list;
+    }).catch(err => {
+        if(timerId) clearTimeout(timerId);
+        throw err;
+    });
+}
+
+function fetchFastLiveHistory(timeoutMs){
+    const startT = performance.now();
+    const primary = 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json';
+    const secondary = 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json';
+
+    return fetchSingleEndpoint(primary, timeoutMs || 1800, startT).catch(function(){
+        return fetchSingleEndpoint(secondary, (timeoutMs || 1800) + 500, startT);
+    });
+}
+
+function getSecLeft(){
+    var now = new Date();
+    var sec = 60 - now.getSeconds();
+    return sec === 60 ? 60 : sec;
+}
+
+setInterval(function(){
+    var pingEl = document.getElementById('ping');
+    if(pingEl){
+        var left = getSecLeft();
+        var sStr = left < 10 ? ('0' + left) : String(left);
+        pingEl.innerText = '00:' + sStr + ' | ' + (navigator.onLine ? realLatencyMs : 999) + 'ms';
+    }
+}, 500);
+
+window.onload = function(){
+    if(cachedHistoryList && cachedHistoryList.length >= 5){
+        applyHistorySignal(cachedHistoryList, true);
+    }
+    analyzeMarket(true);
+    setInterval(autoVerifyMarket, 1200);
+    document.addEventListener('visibilitychange', function(){
+        if(document.visibilityState === 'visible'){
+            autoVerifyMarket();
+        }
+    });
+    var pre = document.createElement('link');
+    pre.rel = 'prefetch';
+    pre.href = 'https://t.me/+WZR7nsATt1szNmRh';
+    document.head.appendChild(pre);
+};
+
+setInterval(function(){
+    let isOnline = navigator.onLine;
+    let netEl = document.getElementById('net-status');
+    if(netEl){
+        netEl.innerText = isOnline ? 'SAVAR NET: TURBO+' : 'SAVAR NET: OFFLINE';
+        netEl.style.color = isOnline ? '#00ffcc' : '#ff0055';
+    }
+}, 900);
+
+function getSavarNumberWeight(num){
+    const map = {
+        0: -1.15, 1: -0.75, 2: -0.85, 3: -0.65, 4: -0.90,
+        5:  1.15, 6:  0.85, 7:  0.70, 8:  0.90, 9:  0.65
+    };
+    return map[num] ?? 0;
+}
+
+function computeSavarSignal(list, nextIssue){
+    const nums = list.slice(0, 12).map(item => parseInt(item.number, 10)).filter(n => !Number.isNaN(n));
+    const l0 = nums[0] ?? 0;
+    const l1 = nums[1] ?? 0;
+    const l2 = nums[2] ?? 0;
+    const l3 = nums[3] ?? 0;
+    const l4 = nums[4] ?? 0;
+
+    let score = 0;
+    const weights = [3.6, 2.7, 2.0, 1.4, 0.9, 0.5];
+    nums.slice(0, 6).forEach((val, idx) => {
+        const dir = val >= 5 ? 1 : -1;
+        score += (dir * 0.75 + getSavarNumberWeight(val) * 0.55) * weights[idx];
+    });
+
+    const last10 = nums.slice(0, 10);
+    if(last10.length > 0){
+        const bigCnt = last10.filter(v => v >= 5).length;
+        const smallCnt = last10.length - bigCnt;
+        score += ((smallCnt - bigCnt) / last10.length) * 2.2;
+    }
+
+    let streak = 1;
+    const firstBig = l0 >= 5;
+    for(let i = 1; i < nums.length; i++){
+        if((nums[i] >= 5) === firstBig) streak++;
+        else break;
+    }
+    if(streak >= 3){
+        const revBoost = Math.min(4.2, 2.0 + (streak - 3) * 0.85);
+        score += firstBig ? -revBoost : revBoost;
+    }
+
+    const issueStr = String(nextIssue);
+    const d1 = parseInt(issueStr.slice(-1), 10) || 0;
+    const d2 = parseInt(issueStr.slice(-2, -1), 10) || 0;
+    const d3 = parseInt(issueStr.slice(-3, -2), 10) || 0;
+    score += (((d1 * 9 + d2 * 5 + d3 * 3) % 11) - 5) * 0.42;
+
+    const shortAvg = (nums.slice(0, 3).reduce((a, b) => a + (b >= 5 ? 1 : -1), 0)) / 3;
+    const midAvg = (nums.slice(0, 8).reduce((a, b) => a + (b >= 5 ? 1 : -1), 0)) / Math.max(1, nums.slice(0, 8).length);
+    score += (shortAvg * 0.8 + midAvg * 0.6);
+
+    if(consecutiveLosses > 0 && Math.abs(score) < 0.75){
+        score += (l0 >= 5 ? -1.1 : 1.1);
+    }
+
+    const predictedSignal = score >= 0 ? 'BIG' : 'SMALL';
+    const confidencePct = Math.min(94, Math.max(58, Math.round(58 + Math.abs(score) * 7.5)));
+    const recentSet = new Set(nums.slice(0, 3));
+    const seed = (l0 * 17 + l1 * 13 + l2 * 9 + l3 * 7 + l4 * 5 + d1 * 19 + d2 * 11) % 10;
+
+    let exactNumber;
+    if(predictedSignal === 'BIG'){
+        const pool = [5, 6, 7, 8, 9];
+        let filtered = pool.filter(x => !recentSet.has(x));
+        if(!filtered.length) filtered = pool;
+        exactNumber = filtered[seed % filtered.length];
+    }else{
+        const pool = [0, 1, 2, 3, 4];
+        let filtered = pool.filter(x => !recentSet.has(x));
+        if(!filtered.length) filtered = pool;
+        exactNumber = filtered[seed % filtered.length];
+    }
+
+    return { predictedSignal, exactNumber, confidencePct };
+}
+
+function renderSavarSignal(predictedSignal, exactNumber, nextIssue, confidencePct){
+    let colorClass = getNumberColorClass(exactNumber);
+    let sigColor = predictedSignal === 'BIG' ? '#ffcc00' : '#00ffcc';
+    let conf = confidencePct || 75;
+    let modeTag = consecutiveLosses > 0 ? 'STEP-2 SAFE' : 'PROFIT GUARD';
+    document.getElementById('screen-content').innerHTML=
+    "<div class='signal-row'>" +
+        "<div class='number-ball "+colorClass+"'>"+exactNumber+"</div>" +
+        "<span class='signal-text' style='color:"+sigColor+";'>"+predictedSignal+"</span>" +
+    "</div>" +
+    "<div class='sub'>SAVAR P:"+String(nextIssue).slice(-5)+" | "+currentStakeAmount+"৳ ("+conf+"%)</div>"+
+    "<div class='trend-info'>"+modeTag+" | SAVAR LIVE • TG</div>";
+}
+
+function applyHistorySignal(list, silentAuto){
+    updateLiveLastResult(list[0]);
+    var nextIssue = (BigInt(list[0].issueNumber) + 1n).toString();
+    const { predictedSignal, exactNumber, confidencePct } = computeSavarSignal(list, nextIssue);
+
+    lastAnalyzedIssue = list[0].issueNumber;
+    lastPredictedSignal = predictedSignal;
+    lastPredictedNumber = exactNumber;
+
+    if(silentAuto){
+        renderSavarSignal(predictedSignal, exactNumber, nextIssue, confidencePct);
+    }else{
+        setTimeout(function(){
+            renderSavarSignal(predictedSignal, exactNumber, nextIssue, confidencePct);
+        }, 220);
+    }
+}
+
+function analyzeMarket(silentAuto){
+    if(isSyncingNow && !silentAuto) return;
+
+    if(!navigator.onLine){
+        if(cachedHistoryList && cachedHistoryList.length >= 5){
+            applyHistorySignal(cachedHistoryList, silentAuto);
+            return;
+        }
+        if(!silentAuto) alert("⚠️ Internet connection lost!");
+        return;
+    }
+
+    if(!silentAuto){
+        isSyncingNow = true;
+        document.getElementById('screen-content').innerHTML=
+        "<div id='circle' class='circle' style='display:block'></div>" +
+        "<div style='font-size:8.5px; color:#00ffcc; margin-top:4px;'>SAVAR TURBO SYNC...</div>";
+    }
+
+    fetchFastLiveHistory(silentAuto ? 1900 : 1400)
+    .then(list => {
+        isSyncingNow = false;
+        applyHistorySignal(list, silentAuto);
+    })
+    .catch(() => {
+        isSyncingNow = false;
+        if(cachedHistoryList && cachedHistoryList.length >= 5){
+            applyHistorySignal(cachedHistoryList, silentAuto);
+        }else if(!silentAuto){
+            document.getElementById('screen-content').innerHTML=
+            "<div class='value'>TURBO RETRY</div>"+
+            "<div class='sub'>AMOUNT: 100৳</div>"+
+            "<div class='trend-info'>FAST RECONNECTING...</div>";
+        }
+    });
+}
+
+function autoVerifyMarket(){
+    if(!navigator.onLine) return;
+
+    fetchFastLiveHistory(1650)
+    .then(list => {
+        var last = list[0];
+        const latestStr = String(last.issueNumber);
+        const isNewPeriod = (lastSeenPeriod !== null && lastSeenPeriod !== latestStr);
+        lastSeenPeriod = latestStr;
+
+        updateLiveLastResult(last);
+
+        if(lastPredictedSignal && last.issueNumber !== lastAnalyzedIssue && lastAnalyzedIssue !== null) {
+            let actualWinNum = parseInt(last.number, 10);
+            let actualSize = actualWinNum >= 5 ? 'BIG' : 'SMALL';
+            let isWin = (lastPredictedSignal === actualSize) || (lastPredictedNumber === actualWinNum);
+
+            let popup = document.getElementById('result-popup');
+            let header = document.getElementById('popup-header');
+            let amtElement = document.getElementById('popup-amount');
+            let detailsElement = document.getElementById('popup-details');
+
+            let usedStake = currentStakeAmount;
+            if(isWin) {
+                let winAmount = Math.round(usedStake * 0.96);
+                consecutiveLosses = 0;
+                currentStakeAmount = BASE_AMOUNT;
+                header.innerText = "🎉 PROFIT LOCKED 🎉";
+                header.style.color = "#00ffcc";
+                amtElement.innerText = `+${winAmount}৳ (${usedStake}৳)`;
+                detailsElement.innerHTML = `Period: ${last.issueNumber}<br>Hit Number: ${actualWinNum} (${actualSize}) • Next: 100৳`;
+            } else {
+                if(consecutiveLosses === 0){
+                    consecutiveLosses = 1;
+                    currentStakeAmount = RECOVERY_AMOUNT;
+                } else {
+                    consecutiveLosses = 0;
+                    currentStakeAmount = BASE_AMOUNT;
+                }
+                header.innerText = "SAFE STEP";
+                header.style.color = "#ffcc00";
+                amtElement.innerText = `NEXT: ${currentStakeAmount}৳`;
+                detailsElement.innerHTML = `Period: ${last.issueNumber}<br>Result: ${actualWinNum} (${actualSize})`;
+            }
+
+            if(isUnlocked){
+                popup.style.display = 'flex';
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 2600);
+            }
+
+            lastAnalyzedIssue = last.issueNumber;
+            lastPredictedSignal = null;
+
+            const nextIssue = (BigInt(last.issueNumber) + 1n).toString();
+            const nextSig = computeSavarSignal(list, nextIssue);
+            lastPredictedSignal = nextSig.predictedSignal;
+            lastPredictedNumber = nextSig.exactNumber;
+            renderSavarSignal(nextSig.predictedSignal, nextSig.exactNumber, nextIssue, nextSig.confidencePct);
+            return;
+        }
+
+        const nextIssue = (BigInt(last.issueNumber) + 1n).toString();
+        if(isNewPeriod || !lastPredictedSignal){
+            const sig = computeSavarSignal(list, nextIssue);
+            lastPredictedSignal = sig.predictedSignal;
+            lastPredictedNumber = sig.exactNumber;
+            renderSavarSignal(sig.predictedSignal, sig.exactNumber, nextIssue, sig.confidencePct);
+        }
+    })
+    .catch(() => {
+        if(cachedHistoryList && cachedHistoryList.length >= 5 && !lastPredictedSignal){
+            applyHistorySignal(cachedHistoryList, true);
+        }
+    });
+}
+</script>
+
+</body>
+</html>
